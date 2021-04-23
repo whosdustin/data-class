@@ -1,6 +1,7 @@
 import hash from './utils/hash';
 import {
-  key_type,
+  KeyType,
+  RecordOf,
   AnyFunction,
 } from './@types';
 
@@ -10,7 +11,7 @@ const DEFAULTS = Symbol('DefaultValues');
 const NOOP = () => void 0;
 
 export class DataClass<T> {
-  constructor(data: Partial<T> | symbol = {}) {
+  constructor(data: ThisType<T> | symbol = {}) {
     // Captures default values on initialization
     if (data === GUARD) return this;
 
@@ -48,11 +49,12 @@ export class DataClass<T> {
     }
   }
 
-  public update(patch: Partial<T>): T {
-    const data = Object.assign(new Object(), this['to_json'](), patch);
+  public update(fn: (value: RecordOf<T>) => RecordOf<T>): T {
+    const data = Object.assign<Record<string, unknown>, RecordOf<T>>(
+      {}, this['to_json']()
+    );
     const _this = Object.getPrototypeOf(this);
-
-    return new _this.constructor(data);
+    return new _this.constructor(fn(data));
   }
 
   public equals(comparator: T): boolean {
@@ -74,17 +76,17 @@ export class DataClass<T> {
     return true;
   }
 
-  public to_json(): Record<string, unknown> {
-    const _this: Map<key_type, unknown> = this[VALUES]; 
+  public to_json(): RecordOf<T> {
+    const _this: Map<KeyType, unknown> = this[VALUES]; 
     const result = {};
     
-    _this.forEach((value: any, key: key_type) => {
+    _this.forEach((value: any, key: KeyType) => {
       result[key] = this._is_data_class(value, 'to_json')
         ? value['to_json']()
         : value;
     });
 
-    return result;
+    return result as RecordOf<T>;
   }
 
   private _compare_functions(
@@ -98,11 +100,11 @@ export class DataClass<T> {
   }
 
   private _key_exists(
-    record: Record<string, unknown> | symbol,
-    key: key_type
+    obj: ThisType<T> | symbol,
+    key: KeyType
   ): boolean {
-    if (typeof record !== 'object') return false;
-    return key in record;
+    if (typeof obj !== 'object') return false;
+    return key in obj;
   }
 
   private _is_data_class(
@@ -117,9 +119,9 @@ export class DataClass<T> {
   }
 
   private _has_own_property(
-    record: Record<string, unknown>,
-    property: key_type
+    obj: Record<string, unknown>,
+    property: KeyType
   ): boolean {
-    return Object.prototype.hasOwnProperty.call(record, property);
+    return Object.prototype.hasOwnProperty.call(obj, property);
   }
 }

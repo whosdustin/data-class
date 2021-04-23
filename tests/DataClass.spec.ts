@@ -55,23 +55,6 @@ describe('DataClass', () => {
     expect(JSON.stringify(default_person)).toBe(JSON.stringify(default_person_json));
   });
 
-  it('supports nested updates', () => {
-    const updated_car_owners_name = default_car
-      .update({
-        owner: default_car.owner.update({ name: 'Shanks Mackle' })
-      });
-
-    expect(JSON.stringify(updated_car_owners_name)).toBe(JSON.stringify({
-      make: 'Shimwagon',
-      owner: {
-        name: 'Shanks Mackle',
-        phone: 5555555555,
-        isPerson: true,
-      },
-      honk: () => 'Honk' 
-    }))
-  });
-
   describe('to_json', () => {
     it('creates a new instance with default values', () => {
       expect(default_person.to_json()).toEqual(default_person_json);
@@ -95,7 +78,10 @@ describe('DataClass', () => {
   describe('update', () => {
     it('creates a new instance populated with changed data', () => {
       const initial_person = new Person({ name: 'Dane John' });
-      const updated_person = initial_person.update({ phone: 3333333333 });
+      const updated_person = initial_person.update((person) => {
+        person.phone = 3333333333;
+        return person;
+      });
   
       // Check instance is different
       expect(initial_person).not.toEqual(updated_person);
@@ -114,6 +100,27 @@ describe('DataClass', () => {
         isPerson: true,
       });
     });
+
+    it('supports nested updates', () => {
+      const updated_car_owners_name = default_car
+        .update(car => {
+          car.owner = default_car.owner.update(person => {
+            person.name = 'Shanks Mackle';
+            return person;
+          });
+          return car;
+        });
+  
+      expect(JSON.stringify(updated_car_owners_name)).toBe(JSON.stringify({
+        make: 'Shimwagon',
+        owner: {
+          name: 'Shanks Mackle',
+          phone: 5555555555,
+          isPerson: true,
+        },
+        honk: () => 'Honk' 
+      }))
+    });
   });
 
   describe('equals', () => {
@@ -124,7 +131,10 @@ describe('DataClass', () => {
     
     it('compares unequal values of different instances', () => {
       const initial_person = new Person();
-      const changed_person = initial_person.update({ name: 'Fancy Pants' });
+      const changed_person = initial_person.update(person => {
+        person.name = 'Fancy Pants';
+        return person;
+      });
       expect(initial_person.equals(changed_person)).toBe(false);
     });
 
