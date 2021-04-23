@@ -35,5 +35,19 @@
     "branches": [
       "main"
     ]
-  }
+  },
+  "description": "",
+  "directories": {
+    "lib": "lib",
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/whosdustin/data-class.git"
+  },
+  "author": "Dustin Delatore <dustin@delatore.me> (https://whosdustin.com)",
+  "bugs": {
+    "url": "https://github.com/whosdustin/data-class/issues"
+  },
+  "homepage": "https://github.com/whosdustin/data-class#readme"
 }
