@@ -10,7 +10,7 @@
     ],
     "declaration": true,
     "outDir": "./lib",
-    "rootDir": "./src",
+    "rootDir": ".",
     "strict": true,
     "moduleResolution": "node",
     "baseUrl": "./src",
